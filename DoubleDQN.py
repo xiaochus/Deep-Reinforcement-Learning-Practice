@@ -6,18 +6,18 @@ import numpy as np
 from DQN import DQN
 
 
-class NDQN(DQN):
+class DDQN(DQN):
     """Nature Deep Q-Learning.
     """
     def __init__(self):
-        super(NDQN, self).__init__()
+        super(DDQN, self).__init__()
 
         self.model = self.build_model()
         self.target_model = self.build_model()
         self.update_target_model()
 
-        if os.path.exists('model/ndqn.h5'):
-            self.model.load_weights('model/ndqn.h5')
+        if os.path.exists('model/ddqn.h5'):
+            self.model.load_weights('model/ddqn.h5')
 
     def update_target_model(self):
         """update target_model
@@ -41,11 +41,12 @@ class NDQN(DQN):
 
         y = self.model.predict(states)
         q = self.target_model.predict(next_states)
+        next_action = np.argmax(self.model.predict(next_states), axis=1)
 
         for i, (_, action, reward, _, done) in enumerate(data):
             target = reward
             if not done:
-                target += self.gamma * np.amax(q[i])
+                target += self.gamma * q[i][next_action[i]]
             y[i][action] = target
 
         return states, y
@@ -96,15 +97,15 @@ class NDQN(DQN):
 
                 print('Episode: {} | Episode reward: {} | loss: {:.3f} | e:{:.2f}'.format(i, reward_sum, loss, self.epsilon))
 
-        self.model.save_weights('model/ndqn.h5')
+        self.model.save_weights('model/ddqn.h5')
 
         return history
 
 
 if __name__ == '__main__':
-    model = NDQN()
+    model = DDQN()
 
     history = model.train(600, 32)
-    model.save_history(history, 'ndqn.csv')
+    model.save_history(history, 'ddqn.csv')
 
     model.play('dqn')

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import gym
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
@@ -15,7 +16,7 @@ class DRL:
         if not os.path.exists('history'):
             os.mkdir('history')
 
-    def play(self):
+    def play(self, m='dpg'):
         """play game with model.
         """
         print('play...')
@@ -28,8 +29,11 @@ class DRL:
             self.env.render()
 
             x = observation.reshape(-1, 4)
-            prob = self.model.predict(x)[0][0]
-            action = 1 if prob > 0.5 else 0
+            if m == 'dpg':
+                prob = self.model.predict(x)[0][0]
+                action = 1 if prob > 0.5 else 0
+            else:
+                action = np.argmax(self.model.predict(x)[0])
             observation, reward, done, _ = self.env.step(action)
 
             reward_sum += reward
