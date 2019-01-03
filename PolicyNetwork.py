@@ -11,16 +11,16 @@ import keras.backend as K
 from DRL import DRL
 
 
-class DPG(DRL):
-    """Deterministic Policy Gradient Algorithms
+class PolicyNetwork(DRL):
+    """Policy Gradient Algorithms(Policy Network)
     """
     def __init__(self):
-        super(DPG, self).__init__()
+        super(PolicyNetwork, self).__init__()
 
         self.model = self._build_model()
 
-        if os.path.exists('model/dpg.h5'):
-            self.model.load_weights('model/dpg.h5')
+        if os.path.exists('model/pg.h5'):
+            self.model.load_weights('model/pg.h5')
 
         self.gamma = 0.95
 
@@ -133,15 +133,15 @@ class DPG(DRL):
                 rewards = []
                 discount_rewards = []
 
-        self.model.save_weights('model/dpg.h5')
+        self.model.save_weights('model/pg.h5')
 
         return history
 
 
 if __name__ == '__main__':
-    model = DPG()
+    model = PolicyNetwork()
 
     history = model.train(5000, 5)
-    model.save_history(history, 'dpg.csv')
+    model.save_history(history, 'pg.csv')
 
     model.play()

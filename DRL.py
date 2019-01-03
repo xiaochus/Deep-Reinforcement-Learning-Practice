@@ -16,7 +16,7 @@ class DRL:
         if not os.path.exists('history'):
             os.mkdir('history')
 
-    def play(self, m='dpg'):
+    def play(self, m='pg'):
         """play game with model.
         """
         print('play...')
@@ -29,8 +29,11 @@ class DRL:
             self.env.render()
 
             x = observation.reshape(-1, 4)
-            if m == 'dpg':
+            if m == 'pg':
                 prob = self.model.predict(x)[0][0]
+                action = 1 if prob > 0.5 else 0
+            elif m == 'acs':
+                prob = self.actor.predict(x)[0][0]
                 action = 1 if prob > 0.5 else 0
             else:
                 action = np.argmax(self.model.predict(x)[0])
