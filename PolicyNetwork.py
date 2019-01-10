@@ -18,11 +18,11 @@ class PolicyNetwork(DRL):
         super(PolicyNetwork, self).__init__()
 
         self.model = self._build_model()
+        self.gamma = 0.95
 
+    def load(self):
         if os.path.exists('model/pg.h5'):
             self.model.load_weights('model/pg.h5')
-
-        self.gamma = 0.95
 
     def _build_model(self):
         """basic model.
@@ -143,5 +143,6 @@ if __name__ == '__main__':
 
     history = model.train(5000, 5)
     model.save_history(history, 'pg.csv')
-
+    
+    model.load()
     model.play()

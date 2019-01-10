@@ -20,11 +20,12 @@ class AC(DRL):
         self.actor = self._build_actor()
         self.critic = self._build_critic()
 
+        self.gamma = 0.9
+
+    def load(self):
         if os.path.exists('model/actor_acs.h5') and os.path.exists('model/critic_acs.h5'):
             self.actor.load_weights('model/actor_acs.h5')
             self.critic.load_weights('model/critic_acs.h5')
-
-        self.gamma = 0.9
 
     def _build_actor(self):
         """actor model.
@@ -157,5 +158,6 @@ if __name__ == '__main__':
 
     history = model.train(300)
     model.save_history(history, 'ac_sparse.csv')
-
+    
+    model.load()
     model.play('acs')

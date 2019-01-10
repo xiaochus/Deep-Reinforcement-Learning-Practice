@@ -16,6 +16,7 @@ class NDQN(DQN):
         self.target_model = self.build_model()
         self.update_target_model()
 
+    def load(self):
         if os.path.exists('model/ndqn.h5'):
             self.model.load_weights('model/ndqn.h5')
 
@@ -107,4 +108,5 @@ if __name__ == '__main__':
     history = model.train(600, 32)
     model.save_history(history, 'ndqn.csv')
 
+    model.load()
     model.play('dqn')

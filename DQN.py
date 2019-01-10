@@ -20,9 +20,6 @@ class DQN(DRL):
 
         self.model = self.build_model()
 
-        if os.path.exists('model/dqn.h5'):
-            self.model.load_weights('model/dqn.h5')
-
         # experience replay.
         self.memory_buffer = deque(maxlen=2000)
         # discount rate for q value.
@@ -34,6 +31,9 @@ class DQN(DRL):
         # min epsilon of ε-greedy.
         self.epsilon_min = 0.01
 
+    def load(self):
+        if os.path.exists('model/dqn.h5'):
+            self.model.load_weights('model/dqn.h5')
 
     def build_model(self):
         """basic model.
@@ -160,5 +160,6 @@ if __name__ == '__main__':
 
     history = model.train(600, 32)
     model.save_history(history, 'dqn.csv')
-
+    
+    model.load()
     model.play()

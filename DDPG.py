@@ -58,6 +58,7 @@ class DDPG(DRL):
         self.get_critic_grad = self.critic_gradient()
         self.actor_optimizer()
 
+    def load(self):
         if os.path.exists('model/ddpg_actor.h5') and os.path.exists('model/ddpg_critic.h5'):
             self.actor.load_weights('model/ddpg_actor.h5')
             self.critic.load_weights('model/ddpg_critic.h5')
@@ -328,5 +329,6 @@ if __name__ == '__main__':
 
     history = model.train(200, 128)
     model.save_history(history, 'ddpg.csv')
-
+    
+    model.load()
     model.play()
