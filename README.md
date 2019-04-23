@@ -17,4 +17,4 @@ Continuous updating...
 | 6 | [Policy Network](PolicyNetwork.py) | [Policy gradient methods for reinforcement learning with function approximation](https://www.researchgate.net/publication/2503757_Policy_Gradient_Methods_for_Reinforcement_Learning_with_Function_Approximation) |
 | 7 | [DDPG](DDPG.py) | [Continuous Control with Deep Reinforcement Learning](https://arxiv.org/abs/1509.02971) |
 | 8 | [PPO_TF](PPO_TF.py) | [Proximal Policy Optimization Algorithms](https://arxiv.org/abs/1707.06347) |
-
+| 9 | [A3C](A3C_sparse.py) | [Asynchronous Methods for Deep Reinforcement Learning](https://arxiv.org/pdf/1602.01783.pdf) |
