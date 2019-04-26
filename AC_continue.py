@@ -2,9 +2,8 @@
 import os
 import gym
 import numpy as np
-import tensorflow as tf
 
-from keras.layers import Input, Dense, concatenate
+from keras.layers import Input, Dense, concatenate, Lambda
 from keras.models import Model
 from keras.optimizers import Adam
 import keras.backend as K
@@ -14,6 +13,7 @@ from DRL import DRL
 
 class AC(DRL):
     """Actor Critic Algorithms with continuous action.
+       not stable during training.
     """
     def __init__(self):
         super(AC, self).__init__()
@@ -36,8 +36,12 @@ class AC(DRL):
         inputs = Input(shape=(3,))
         x = Dense(20, activation='relu')(inputs)
         x = Dense(20, activation='relu')(x)
+
         mu = Dense(1, activation='tanh')(x)
+        mu = Lambda(lambda x: self.bound * x)(mu)
+
         sigma = Dense(1, activation='softplus')(x)
+        sigma = Lambda(lambda x: x + 0.0001)(sigma)
 
         out = concatenate([mu, sigma], axis=-1)
 
@@ -70,13 +74,16 @@ class AC(DRL):
         mu, sigma = y_pred[:, 0], y_pred[:, 1]
         action_true, td_error = y_true[:, 0], y_true[:, 1]
 
-        mu = self.bound * mu
-        sigma = sigma + 0.1
-        action_true = K.reshape(action_true, (-1, 1))
+        # probability density function
+        pdf = 1. / K.sqrt(2. * np.pi * sigma) * K.exp(-K.square(action_true - mu) / (2. * sigma))
+        log_pdf = K.log(pdf + K.epsilon())
+        # entropy for explore
+        entropy = K.sum(0.5 * (K.log(2. * np.pi * sigma) + 1.))
 
-        normal_dist = tf.distributions.Normal(mu, sigma)
-        log_prob = normal_dist.log_prob(action_true)
-        loss = log_prob * K.flatten(td_error)
+        exp_v = log_pdf * td_error
+
+        exp_v = K.sum(exp_v + 0.01 * entropy)
+        loss = -exp_v
 
         return loss
 
@@ -103,7 +110,9 @@ class AC(DRL):
             action: action
         """
         mu, sigma = self.actor.predict(x)[0]
-        action = np.random.normal(mu, sigma, 1)[0]
+        epsilon = np.random.randn(1)[0]
+        action = mu + np.sqrt(sigma) * epsilon
+
         action = np.clip(action, -self.bound, self.bound)
 
         return action
@@ -118,7 +127,7 @@ class AC(DRL):
             history: training history
         """
         self.actor.compile(loss=self._actor_loss, optimizer=Adam(lr=0.001))
-        self.critic.compile(loss='mse', optimizer=Adam(lr=0.01))
+        self.critic.compile(loss='mse', optimizer=Adam(lr=0.002))
 
         history = {'episode': [], 'Episode_reward': [],
                    'actor_loss': [], 'critic_loss': []}
@@ -163,7 +172,7 @@ class AC(DRL):
                     history['actor_loss'].append(aloss)
                     history['critic_loss'].append(closs)
 
-                    print('Episode: {} | Episode reward: {} | actor_loss: {:.3f} | critic_loss: {:.3f}'.format(i, episode_reward, aloss, closs))
+                    print('Episode: {} | Episode reward: {:.2f} | actor_loss: {:.3f} | critic_loss: {:.3f}'.format(i, episode_reward, aloss, closs))
 
                     break
 
